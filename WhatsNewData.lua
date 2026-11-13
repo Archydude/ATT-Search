@@ -2,10 +2,14 @@
 ArchdudeWhatsNew:Register("ATT-Search", {
 	title = "ATT-Search",
 	icon = "Interface\\Icons\\INV_Misc_Spyglass_03",
-	version = "1.3.1",
+	version = "1.4.0",
 	seen = "ATTSearchWhatsNew",
 	saved = { "ATTSearchDB", "ATTSearchSettings" },
 	changes = {
+		{ "1.4.0",
+			"The What's New window has a |cffffd100Don't show this after updates|r checkbox that stops it opening after updates, for all the addons that use it. Type |cffffd100/whatsnew|r to see the latest changes, or to turn it back on.",
+			"Fixed an error when opening the options during combat (\"tried to call the protected function 'OpenSettingsPanel()'\"). The options now open as soon as the fight ends.",
+		},
 		{ "1.3.1",
 			"Shift+click an achievement (or Shift+Enter) to open it in the game's Achievements window. Other results still get a waypoint, and so do achievements on game versions without an Achievements window (Classic Era, TBC Anniversary).",
 		},
@@ -53,12 +57,6 @@ ArchdudeWhatsNew:Register("ATT-Search", {
 			"New options page (the cog at the end of the search bar, Options > AddOns > ATT-Search, or |cffffd100/atts options|r) with everything the chat commands do: the three settings, Open search and Clear Cache buttons (Clear Cache asks first), and a live status. Clear Cache keeps your settings.",
 			"|cffffd100/atts status|r shows the quest names on a line of their own.",
 			"If an earlier version already slowed down your quest data, it can stay slow for a while after updating. It clears on its own.",
-		},
-		{ "1.1.7",
-			"Fixed the quest log, quest objectives (tooltips, map, minimap) and \"Quest accepted\" messages going missing for a while after login or party sync, mostly on a fresh game cache: building the search index held up the game's own quest data.",
-			"Fixed quest names in ATT's list turning into \"Quest #1234*\" during party sync. Background name loading now pauses during party sync and for a while after it ends, and when the server is slow or refuses.",
-			"New |cffffd100/atts lookups off|r (and |cffffd100on|r): stops ATT-Search's background name loading. Search still finds every name the game has already loaded. The setting is saved.",
-			"New |cffffd100/atts status|r: shows whether background name loading is running or paused, and why. Handy for bug reports.",
 		},
 	},
 })

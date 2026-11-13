@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0
+- The What's New window has a **Don't show this after updates** checkbox that stops it opening after updates, for all the addons that use it. Type **/whatsnew** to see the latest changes, or to turn it back on.
+- Fixed an error when opening the options during combat ("tried to call the protected function 'OpenSettingsPanel()'"). The options now open as soon as the fight ends.
+
 ## 1.3.1
 - Shift+click an achievement (or Shift+Enter) to open it in the game's Achievements window. Other results still get a waypoint, and so do achievements on game versions without an Achievements window (Classic Era, TBC Anniversary).
 

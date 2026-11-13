@@ -266,8 +266,25 @@ elseif InterfaceOptions_AddCategory then
 	InterfaceOptions_AddCategory(panel)
 end
 
+-- The game doesn't let addons open its settings during combat, so a request then waits for the fight to end.
+local openAfterCombat = false
+local combatWatch = CreateFrame("Frame")
+combatWatch:SetScript("OnEvent", function(self)
+	self:UnregisterEvent("PLAYER_REGEN_ENABLED")
+	openAfterCombat = false
+	Options.Open()
+end)
+
 -- Opens this page in the game's settings.
 function Options.Open()
+	if InCombatLockdown() then
+		if not openAfterCombat then
+			openAfterCombat = true
+			combatWatch:RegisterEvent("PLAYER_REGEN_ENABLED")
+			Util.Print("the options open when you leave combat.")
+		end
+		return
+	end
 	if category and Settings.OpenToCategory then
 		Settings.OpenToCategory(category:GetID())
 	elseif InterfaceOptionsFrame_OpenToCategory then

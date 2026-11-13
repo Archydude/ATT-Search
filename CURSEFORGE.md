@@ -64,11 +64,11 @@ Unofficial companion for All The Things, made with the ATT author's blessing. No
 
 ## B. Upload File form
 
-**File:** `dist\ATT-Search-1.3.1.zip`
+**File:** `dist\ATT-Search-1.4.0.zip`
 
 **Display name**
 ```
-ATT-Search 1.3.1
+ATT-Search 1.4.0
 ```
 
 **Release type:** `Release`
@@ -84,6 +84,10 @@ ATT-Search 1.3.1
 
 **Changelog** (paste only the newest part; paste older parts too if they never went up)
 ```markdown
+1.4.0
+- The What's New window has a **Don't show this after updates** checkbox that stops it opening after updates, for all the addons that use it. Type **/whatsnew** to see the latest changes, or to turn it back on.
+- Fixed an error when opening the options during combat ("tried to call the protected function 'OpenSettingsPanel()'"). The options now open as soon as the fight ends.
+
 1.3.1
 - Shift+click an achievement (or Shift+Enter) to open it in the game's Achievements window. Other results still get a waypoint, and so do achievements on game versions without an Achievements window (Classic Era, TBC Anniversary).
 ```
