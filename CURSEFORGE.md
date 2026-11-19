@@ -56,6 +56,8 @@ Unofficial companion for All The Things, made with the ATT author's blessing. No
 - Ready a few seconds after login, and in moments after a /reload.
 - A big ATT update may need an ATT-Search update too.
 
+This addon was made with AI.
+
 **Feedback and bug reports are welcome** in the comments.
 ```
 ---

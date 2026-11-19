@@ -28,3 +28,6 @@ Copy the `ATT-Search` folder to `World of Warcraft\_retail_\Interface\AddOns\` a
 - If a result is hidden by your ATT filters (for example, "hide collected"), its parents are still expanded and you get a chat message.
 - After an update, a What's New window shows what changed since the version you had.
 - A large ATT update may need an ATT-Search update too.
+
+## Made with AI
+This addon was made with AI.
