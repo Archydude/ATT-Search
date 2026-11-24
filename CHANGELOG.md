@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.2
+- Fixed: ID searches with a kind prefix like `item 19019` or `#19019` now return faster and show an accurate match count.
+- Fixed: typing only spaces in the search bar no longer opens an empty "No matches" dropdown, and clearing saved names lets refused lookups retry right away.
+- Fixed: tidying up old saved names after a tree update no longer causes a brief stutter, and the options page avoids combat errors.
+
 ## 1.4.1
 - Fixed: late-expansion exact and prefix name matches are no longer dropped when searching broad terms, and exact ID searches take priority.
 - Fixed: Shift+clicking an achievement during combat no longer causes a protected-action error, and hidden game values no longer trigger Lua errors while loading names.

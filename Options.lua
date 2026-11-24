@@ -282,7 +282,7 @@ function Options.Open()
 		if not openAfterCombat then
 			openAfterCombat = true
 			combatWatch:RegisterEvent("PLAYER_REGEN_ENABLED")
-			Util.Print("the options open when you leave combat.")
+			Util.Print(L.OPTIONS_AFTER_COMBAT)
 		end
 		return
 	end

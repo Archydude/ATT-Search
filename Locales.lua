@@ -99,6 +99,7 @@ L.ATT_STILL_LOADING = "All The Things is still loading."
 L.MAIN_LIST_NOT_READY = "The All The Things main list isn't ready yet."
 L.NO_WAYPOINTS = "This version of All The Things can't set waypoints."
 L.CACHE_CLEARED = "Saved names cleared. Rebuilding the index in the background."
+L.OPTIONS_AFTER_COMBAT = "Options will open when you leave combat."
 
 -- /atts help
 L.HELP_OPEN = "/atts - open the main list and focus the search bar"

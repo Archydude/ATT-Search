@@ -2,10 +2,15 @@
 ArchdudeWhatsNew:Register("ATT-Search", {
 	title = "ATT-Search",
 	icon = "Interface\\Icons\\INV_Misc_Spyglass_03",
-	version = "1.4.1",
+	version = "1.4.2",
 	seen = "ATTSearchWhatsNew",
 	saved = { "ATTSearchDB", "ATTSearchSettings" },
 	changes = {
+		{ "1.4.2",
+			"Fixed: ID searches with a kind prefix like |cffffd100item 19019|r or |cffffd100#19019|r now return faster and show an accurate match count.",
+			"Fixed: typing only spaces in the search bar no longer opens an empty \"No matches\" dropdown, and clearing saved names lets refused lookups retry right away.",
+			"Fixed: tidying up old saved names after a tree update no longer causes a brief stutter, and the options page avoids combat errors.",
+		},
 		{ "1.4.1",
 			"Fixed: late-expansion exact and prefix name matches are no longer dropped when searching broad terms, and exact ID searches take priority.",
 			"Fixed: Shift+clicking an achievement during combat no longer causes a protected-action error, and hidden game values no longer trigger Lua errors while loading names.",
@@ -43,11 +48,6 @@ ArchdudeWhatsNew:Register("ATT-Search", {
 		{ "1.2.2",
 			"The options page scrolls when it doesn't fit (a small settings window, or a long status), instead of running off the bottom. It uses the same thin scroll bar as the game's own settings, shown only when needed.",
 			"Bigger text: nothing is smaller than the game's normal text size anymore. That includes the options page descriptions, the result paths and checkmarks, and the footer under the results. Result rows are a little taller to fit.",
-		},
-		{ "1.2.1",
-			"Fixed the saved names starting over (on any character, or after a reload) once enough of them had loaded, so name loading began again from the start. The saved names also take about half the space now. Names saved by 1.2.0 that still load are kept.",
-			"Fixed searches like \"item\" or a number matching every item. An item name now ranks as a match from its first letter.",
-			"The saved names are shared by all characters on the account (they always were; the reset above made it look otherwise).",
 		},
 	},
 })

@@ -131,7 +131,7 @@ end
 
 local function QueueSearch()
 	if debounceTimer then debounceTimer:Cancel() debounceTimer = nil end
-	local text = box:GetText() or ""
+	local text = Util.Trim(box:GetText() or "")
 	if #text < Index.MIN_NAME_CHARS and not Index.IsIDQuery(text) then
 		ClearResults()
 		HideResults()

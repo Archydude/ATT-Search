@@ -366,12 +366,23 @@ local function CacheKey(group)
 end
 
 -- Removes saved names whose key wasn't seen in a complete walk of the tree.
-local function PruneCache(seen)
-	local cache, stale = NameCache(), {}
+local function PruneCache(seen, pause)
+	local cache, stale, n = NameCache(), {}, 0
 	for key in pairs(cache) do
+		n = n + 1
+		if pause and n % 2000 == 0 then
+			pause()
+			if cache ~= nameCache then return end
+		end
 		if not seen[key] then stale[#stale + 1] = key end
 	end
-	for i = 1, #stale do cache[stale[i]] = nil end
+	for i = 1, #stale do
+		if pause and i % 2000 == 0 then
+			pause()
+			if cache ~= nameCache then return end
+		end
+		cache[stale[i]] = nil
+	end
 end
 
 -- Coroutine runner -----------------------------------------------------------
@@ -632,6 +643,10 @@ end
 
 local function IndexArrived()
 	arrivalTimer = nil
+	if state == "building" then
+		arrivalTimer = C_Timer.NewTimer(0.2, IndexArrived)
+		return
+	end
 	local ids = arrived
 	arrived = {}
 	local anyAdded = false
@@ -929,14 +944,14 @@ function SchedulePendingRetry()
 	retryTimer = C_Timer.NewTimer(PENDING_RETRY_SECONDS, function()
 		retryTimer = nil
 		if jobs.pending or #pending == 0 then return end
-		if InCombatLockdown() or Restricted() or InPartySync() then SchedulePendingRetry() return end
+		if state ~= "ready" or InCombatLockdown() or Restricted() or InPartySync() then SchedulePendingRetry() return end
 		local forRoot = root
 		StartJob("pending", function()
 			local current = pending
 			pending = {} -- new deferrals during this pass land here
 			local anyAdded, requeued = false, false
 			for i = 1, #current do
-				if root ~= forRoot then return end
+				if root ~= forRoot or state ~= "ready" then return end
 				local entry = current[i]
 				local later, _, known = Classify(entry.group)
 				if entry.kind == "local" then
@@ -1046,7 +1061,7 @@ function Index:Ensure(newRoot)
 				if visited % 5000 == 0 then NotifySoon() end
 			end
 		end
-		PruneCache(seen)
+		PruneCache(seen, Checkpoint)
 		state = "ready"
 		Notify()
 		remoteStartAt = GetTime() + REMOTE_START_DELAY
@@ -1106,6 +1121,10 @@ function Index:ClearCache()
 	ATTSearchDB = nil
 	nameCache = nil
 	noData, noDataItems, noDataNames = nil, nil, nil
+	wipe(refusedThisSession)
+	for id, loaded in pairs(questLoaded) do
+		if not loaded then questLoaded[id] = nil end
+	end
 end
 
 -- A snapshot of the background lookups, for /atts status.
@@ -1209,18 +1228,18 @@ end
 -- Digits ("19019"), optionally after a kind word ("item 19019", "quest:1234", "npc id 5"),
 -- find every ID that starts with them: the exact ID first, then one digit longer, and so on.
 
--- The digits and the field to search (nil for every kind), or nil when the query isn't an ID
--- search.
+-- The digits, the field to search (nil for every kind), and whether the user
+-- explicitly asked for an ID search (`#123`, `id 123`, or `item 123`). Nil when not an ID query.
 local function ParseIDQuery(query)
-	local digits = strmatch(query, "^#?(%d+)$")
-	if digits then return digits end
+	local hash, digits = strmatch(query, "^(#?)(%d+)$")
+	if digits then return digits, nil, hash == "#" end
 	local word
 	word, digits = strmatch(query, "^(%a+)%s*[:#=]?%s*#?(%d+)$")
 	if not word then word, digits = strmatch(query, "^(%a+)%s+id%s*[:#=]?%s*#?(%d+)$") end
 	if not word then return nil end
-	if word == "id" then return digits end
+	if word == "id" then return digits, nil, true end
 	local field = L.ID_KINDS[word] or (strsub(word, -2) == "id" and L.ID_KINDS[strsub(word, 1, -3)])
-	if field then return digits, field end
+	if field then return digits, field, true end
 end
 
 -- Whether text is an ID search (those may be shorter than a name search).
@@ -1307,8 +1326,8 @@ end
 function Index:Search(query, onDone)
 	CancelJob("search")
 	query = strlower(Util.Trim(query or ""))
-	local digits, field = ParseIDQuery(query)
-	local searchNames = not field and #query >= MIN_NAME_CHARS
+	local digits, field, explicit = ParseIDQuery(query)
+	local searchNames = not explicit and #query >= MIN_NAME_CHARS
 	if not digits and not searchNames then onDone({}, 0) return end
 	StartJob("search", function()
 		local results, total = {}, 0
