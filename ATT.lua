@@ -165,11 +165,14 @@ end
 
 -- Whether text is a "still loading" placeholder rather than a real name.
 function ATT.IsRetrieving(text)
+	if text == nil or IsSecret(text) then return true end
 	local app = App()
 	local mod = app and app.Modules and app.Modules.RetrievingData
-	if mod and type(mod.IsRetrieving) == "function" then return mod.IsRetrieving(text) end
-	return text == nil or IsSecret(text) or text == ""
-		or string.find(text, RETRIEVING_DATA or "Retrieving", 1, true) ~= nil
+	if mod and type(mod.IsRetrieving) == "function" then
+		local ok, result = pcall(mod.IsRetrieving, text)
+		if ok then return result end
+	end
+	return text == "" or string.find(text, RETRIEVING_DATA or "Retrieving", 1, true) ~= nil
 end
 
 -- Whether ATT already knows this NPC's name (reading it then costs nothing).

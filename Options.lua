@@ -133,6 +133,7 @@ local function RunCommand(name)
 end
 
 local function CloseSettings()
+	if InCombatLockdown() then return end
 	if SettingsPanel and SettingsPanel:IsShown() then
 		HideUIPanel(SettingsPanel)
 	elseif InterfaceOptionsFrame and InterfaceOptionsFrame:IsShown() then

@@ -1173,19 +1173,31 @@ local function MarkHidden(results)
 end
 
 -- Name matches, best first. Returns up to MAX_RESULTS of them and the number of matches.
--- Runs inside the search job.
+-- Runs inside the search job. Bucketing by score ensures exact/prefix matches in later
+-- expansions aren't crowded out by earlier substring matches when total > MAX_COLLECT.
 local function SearchNames(query)
-	local results, total = {}, 0
+	local buckets, total = { [0] = {}, [1] = {}, [2] = {}, [3] = {} }, 0
 	for i = 1, #names do
 		local name = names[i]
 		local at = strfind(name, query, 1, true)
 		if at then
 			total = total + 1
-			if #results < MAX_COLLECT then
-				results[#results + 1] = { group = groups[i], name = name, score = Score(name, query, at), len = #name, order = i }
+			local score = Score(name, query, at)
+			local bucket = buckets[score]
+			if #bucket < MAX_COLLECT then
+				bucket[#bucket + 1] = { group = groups[i], name = name, score = score, len = #name, order = i }
 			end
 		end
 		if i % 1000 == 0 then Checkpoint() end
+	end
+	local results = {}
+	for score = 0, 3 do
+		local bucket = buckets[score]
+		for i = 1, #bucket do
+			if #results >= MAX_COLLECT then break end
+			results[#results + 1] = bucket[i]
+		end
+		if #results >= MAX_COLLECT then break end
 	end
 	MarkHidden(results)
 	sort(results, CompareResults)
@@ -1236,7 +1248,7 @@ local function SearchIDs(digits, field)
 		end
 	end
 	local first, ranges = lo[1] or math.huge, #lo
-	local buckets, total, lastGroup = {}, 0, nil
+	local buckets, total, lastGroup, lastExtra = {}, 0, nil, nil
 	for i = 1, #idNums do
 		local id = idNums[i]
 		if id >= first and (not field or idFields[i] == field) then
@@ -1244,18 +1256,23 @@ local function SearchIDs(digits, field)
 				if id < lo[extra] then break end
 				if id <= hi[extra] then
 					local group = idGroups[i]
-					-- A group whose IDs both match (a recipe's Recipe ID and Spell ID) counts once.
+					-- A group whose IDs both match (a recipe's Recipe ID and Spell ID) counts once,
+					-- keeping its closest (exact) match if a secondary ID matches better.
 					if group ~= lastGroup then
-						lastGroup = group
+						lastGroup, lastExtra = group, extra
 						total = total + 1
-						local bucket = buckets[extra]
-						if not bucket then
-							bucket = {}
-							buckets[extra] = bucket
-						end
-						if #bucket < MAX_COLLECT then
-							bucket[#bucket + 1] = { group = group, idField = idFields[i], id = id, order = i }
-						end
+					elseif extra < lastExtra then
+						lastExtra = extra
+					else
+						break
+					end
+					local bucket = buckets[extra]
+					if not bucket then
+						bucket = {}
+						buckets[extra] = bucket
+					end
+					if #bucket < MAX_COLLECT then
+						bucket[#bucket + 1] = { group = group, idField = idFields[i], id = id, order = i }
 					end
 					break
 				end
@@ -1264,7 +1281,7 @@ local function SearchIDs(digits, field)
 		if i % 2000 == 0 then Checkpoint() end
 	end
 	-- Closest IDs first; only the buckets that make it into the results get sorted.
-	local results = {}
+	local results, added = {}, {}
 	for extra = 1, ranges do
 		local bucket = buckets[extra]
 		if bucket then
@@ -1272,7 +1289,11 @@ local function SearchIDs(digits, field)
 			sort(bucket, CompareIDResults)
 			for i = 1, #bucket do
 				if #results >= MAX_RESULTS then break end
-				results[#results + 1] = bucket[i]
+				local entry = bucket[i]
+				if not added[entry.group] then
+					added[entry.group] = true
+					results[#results + 1] = entry
+				end
 			end
 			if #results >= MAX_RESULTS then break end
 		end
@@ -1287,20 +1308,23 @@ function Index:Search(query, onDone)
 	CancelJob("search")
 	query = strlower(Util.Trim(query or ""))
 	local digits, field = ParseIDQuery(query)
-	local searchNames = #query >= MIN_NAME_CHARS
+	local searchNames = not field and #query >= MIN_NAME_CHARS
 	if not digits and not searchNames then onDone({}, 0) return end
 	StartJob("search", function()
 		local results, total = {}, 0
 		if digits then results, total = SearchIDs(digits, field) end
 		if searchNames then
 			local named, namedTotal = SearchNames(query)
-			local byID = {}
+			local byID, dupes = {}, 0
 			for i = 1, #results do byID[results[i].group] = true end
 			for i = 1, #named do
-				if #results >= MAX_RESULTS then break end
-				if not byID[named[i].group] then results[#results + 1] = named[i] end
+				if byID[named[i].group] then
+					dupes = dupes + 1
+				elseif #results < MAX_RESULTS then
+					results[#results + 1] = named[i]
+				end
 			end
-			total = total + namedTotal
+			total = total + math.max(namedTotal - dupes, 0)
 		end
 		onDone(results, total)
 	end)

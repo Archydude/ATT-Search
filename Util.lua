@@ -72,6 +72,7 @@ end
 -- Opens the Achievements window on an achievement, the way the game's own achievement alerts
 -- do when clicked. Returns false when the game has no such achievement or no window for it.
 function Util.OpenAchievement(achievementID)
+	if InCombatLockdown() then return false end
 	if not (Util.CanOpenAchievements() and GetAchievementInfo and GetAchievementInfo(achievementID)) then
 		return false
 	end
