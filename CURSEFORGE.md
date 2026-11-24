@@ -66,11 +66,11 @@ This addon was made with AI.
 
 ## B. Upload File form
 
-**File:** `dist\ATT-Search-1.4.0.zip`
+**File:** `dist\ATT-Search-1.4.1.zip`
 
 **Display name**
 ```
-ATT-Search 1.4.0
+ATT-Search 1.4.1
 ```
 
 **Release type:** `Release`
@@ -86,6 +86,11 @@ ATT-Search 1.4.0
 
 **Changelog** (paste only the newest part; paste older parts too if they never went up)
 ```markdown
+1.4.1
+- Fixed: late-expansion exact and prefix name matches are no longer dropped when searching broad terms, and exact ID searches take priority.
+- Fixed: Shift+clicking an achievement during combat no longer causes a protected-action error, and hidden game values no longer trigger Lua errors while loading names.
+- Fixed: the search box text and placeholder now use a larger, easier-to-read font size.
+
 1.4.0
 - The What's New window has a **Don't show this after updates** checkbox that stops it opening after updates, for all the addons that use it. Type **/whatsnew** to see the latest changes, or to turn it back on.
 - Fixed an error when opening the options during combat ("tried to call the protected function 'OpenSettingsPanel()'"). The options now open as soon as the fight ends.
