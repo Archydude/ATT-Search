@@ -210,7 +210,10 @@ local function CreateBox()
 	if plain then
 		editBox.Instructions = editBox:CreateFontString(nil, "ARTWORK", "GameFontDisable")
 		editBox.Instructions:SetPoint("LEFT", editBox, "LEFT", 2, 0)
+	elseif editBox.Instructions then
+		editBox.Instructions:SetFontObject("GameFontDisable")
 	end
+	editBox:SetFontObject("GameFontHighlight")
 	if editBox.Instructions then editBox.Instructions:SetText(L.SEARCH_PLACEHOLDER) end
 	editBox:SetHeight(20)
 	editBox:SetPoint("LEFT", bar, "LEFT", 12, 0)
